@@ -76,7 +76,10 @@ foreach (var message in messages)
         }
     }
 }
-var superSleeper = sleepers.OrderByDescending(x => x.Value).First().Key;
+var superSleeper = sleepers.OrderByDescending(x =>
+{
+    return minutes[x.Key].Max();
+}).First().Key;
 var superTime = 0;
 var maxTime = 0;
 for (int i = 0; i < 60; i++)
