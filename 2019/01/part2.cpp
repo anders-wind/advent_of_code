@@ -16,7 +16,6 @@ std::vector<int> read_input() {
     return result;
 }
 
-// 5194854
 int main() {
     auto masses = read_input();
     std::function<int(int)> fuel_calculator;

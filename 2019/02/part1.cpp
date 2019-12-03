@@ -27,7 +27,6 @@ void print(std::vector<int> arr)
     }
 }
 
-// 164 too low
 int main()
 {
     auto codes = read_input();

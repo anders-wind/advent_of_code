@@ -61,7 +61,7 @@ int execute_codes(std::vector<int> codes, int noun, int verb) {
     }
     return codes[0];
 }
-// 490668 too high
+
 int main()
 {
     auto codes = read_input();
