@@ -5,6 +5,18 @@
 #include <numeric>
 #include <string>
 
+#define DEBUG
+
+int get_inst_code(int number) {
+    return number%100;
+}
+
+template<int Param>
+int get_param_code(int number) {
+    constexpr int pow_10[3] = {100,1000,10000};
+    return (number/pow_10[Param-1])%10;
+}
+
 std::vector<int> read_input(const std::string& filename)
 {
     auto result = std::vector<int>();
@@ -33,60 +45,142 @@ enum INSTRUCTION {
     TERMINATE = 99,
     ADDITION = 1,
     MULTIPLY = 2,
-    WRITE = 3,
-    PRINT = 4,
+    INPUT = 3,
+    OUTPUT = 4,
 };
 
+enum PARAMETER_MODE {
+    POSITION = 0,
+    IMMIDEATE = 1, 
+};
 
-void execute_addition(std::vector<int>& codes, int& inst_ptr) {
-    auto address_1 = codes.at(inst_ptr + 1);
-    auto address_2 = codes.at(inst_ptr + 2);
-    auto address_write = codes.at(inst_ptr + 3);
-    codes.at(address_write) = codes.at(address_1) + codes.at(address_2);
+template<int Param>
+int get_param(const std::vector<int>& codes, const int code, const int ptr) {
+    auto param = get_param_code<Param>(code);
+    switch (param) {
+        case PARAMETER_MODE::POSITION: {
+            auto address = codes.at(ptr+Param);
+            return codes.at(address);
+        }
+        case PARAMETER_MODE::IMMIDEATE: {
+            return codes.at(ptr+Param);
+        }
+        default: {
+            std::cerr << "unknown parameter" << std::endl;
+            throw "unknown parameter";
+        }
+    }
+}
+
+void debug_print_code(const std::vector<int>& codes, int inst_ptr, const int code) {
+
+    #ifdef DEBUG
+    const auto instruction = get_inst_code(code);
+    std::cout << "inst_ptr: " << inst_ptr << " \t";
+    std::cout << "code: " << code << " \t";
+    // std::cout << "instruction: " << instruction << ", \t";
+    switch (instruction)
+        {
+        case INSTRUCTION::TERMINATE: {
+            std::cout << "TERMINATE!";
+            break;
+        }
+        case INSTRUCTION::ADDITION: {
+            std::cout << "ADDITION( ";
+            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << "\t";
+            std::cout << "val#2: " << get_param<2>(codes, code, inst_ptr) << "\t";
+            std::cout << "write pos: " << codes.at(inst_ptr + 3) << ") ";
+            break;
+        }
+        case INSTRUCTION::MULTIPLY: {
+            std::cout << "MULTIPLY( ";
+            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << "\t";
+            std::cout << "val#2: " << get_param<2>(codes, code, inst_ptr) << "\t";
+            std::cout << "write pos: " << codes.at(inst_ptr + 3) << ") ";
+            break;
+        }
+        case INSTRUCTION::INPUT: {
+            std::cout << "INPUT\t( ";
+            std::cout << "write pos: " << codes.at(inst_ptr + 3) << ") ";
+            break;
+        }
+        case INSTRUCTION::OUTPUT: {
+            std::cout << "OUTPUT\t( ";
+            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << ") ";
+            break;
+        }
+        default: {
+            std::cout << "UNKNOWN instruction" << std::endl;
+            break;
+        }
+    }
+    std::cout << std::endl;
+    #endif
+
+}
+
+void execute_addition(std::vector<int>& codes, int& inst_ptr, const int code) {
+    auto val1 = get_param<1>(codes, code, inst_ptr);
+    auto val2 = get_param<2>(codes, code, inst_ptr);
+    auto write_to = codes.at(inst_ptr +3);
+    codes.at(write_to) = val1 + val2;
     inst_ptr += 4;
 }
 
-void execute_multiplication(std::vector<int>& codes, int& inst_ptr) {
-    auto address_1 = codes.at(inst_ptr + 1);
-    auto address_2 = codes.at(inst_ptr + 2);
-    auto address_write = codes.at(inst_ptr + 3);
-    codes.at(address_write) = codes.at(address_1) * codes.at(address_2);
+void execute_multiplication(std::vector<int>& codes, int& inst_ptr, const int code) {
+    auto val1 = get_param<1>(codes, code, inst_ptr);
+    auto val2 = get_param<2>(codes, code, inst_ptr);
+    auto write_to = codes.at(inst_ptr +3);
+    codes.at(write_to) = val1 * val2;
     inst_ptr += 4;
 }
 
+void execute_input(std::vector<int>& codes, int& inst_ptr, const int code) {
+    constexpr int input = 1;
+    auto write_to = codes.at(inst_ptr + 1);
+    codes.at(write_to) = input;
+    inst_ptr += 2;
+}
 
-int execute_codes(std::vector<int> codes, int noun, int verb) {
-    codes[1] = noun;
-    codes[2] = verb;
+void execute_output(std::vector<int>& codes, int& inst_ptr, const int code) {
+    auto val = get_param<1>(codes, code, inst_ptr);
+    std::cout << val << std::endl;
+    inst_ptr += 2;
+}
+
+int execute_codes(std::vector<int> codes) {
     bool termination_indicator = false;
     auto inst_ptr = 0;
     while(inst_ptr < codes.size() && !termination_indicator)
     {
         const auto code = codes[inst_ptr];
-        switch (code)
+        debug_print_code(codes, inst_ptr, code);
+
+        const auto instruction = get_inst_code(code);
+        switch (instruction)
         {
         case INSTRUCTION::TERMINATE: {
             termination_indicator = true;
             break;
         }
         case INSTRUCTION::ADDITION: {
-            execute_addition(codes, inst_ptr);
+            execute_addition(codes, inst_ptr, code);
             break;
         }
         case INSTRUCTION::MULTIPLY: {
-            execute_multiplication(codes, inst_ptr);
+            execute_multiplication(codes, inst_ptr, code);
             break;
         }
-        case INSTRUCTION::WRITE: {
-            termination_indicator = true;
+        case INSTRUCTION::INPUT: {
+            execute_input(codes, inst_ptr, code);
             break;
         }
-        case INSTRUCTION::PRINT: {
-            termination_indicator = true;
+        case INSTRUCTION::OUTPUT: {
+            execute_output(codes, inst_ptr, code);
             break;
         }
         default: {
-            std::clog << "hit unknown instruction" << std::endl;
+            std::cout << "Terminating due to unknown instruction" << std::endl;
             termination_indicator = true;
             break;
         }
@@ -98,16 +192,6 @@ int execute_codes(std::vector<int> codes, int noun, int verb) {
 int main()
 {
     auto codes = read_input("input.txt");
-    for (auto noun = 0; noun < 100; noun++)
-    {
-        for (auto verb = 0; verb < 100; verb++)
-        {
-            auto result = execute_codes(codes, noun, verb);
-            if (result == 19690720)
-            {
-                std::cout << 100 * noun + verb << std::endl;
-                return 0;
-            }
-        }
-    }
+    // print(codes);
+    auto result = execute_codes(codes);
 }
