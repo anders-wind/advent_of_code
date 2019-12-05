@@ -4,8 +4,11 @@
 #include <fstream>
 #include <numeric>
 #include <string>
+#include <stdexcept>
 
-// #define DEBUG
+
+// compile with: [C++ compiler] part2.cpp [-DDEBUG]
+
 constexpr const char* OUT_PREFIX = "OUT: \t";
 constexpr const char* ERROR_PREFIX = "ERR: \t";
 constexpr const char* DEBUG_PREFIX = "DBG: \t";
@@ -22,8 +25,12 @@ int get_param_code(int number) {
 
 std::vector<int> read_input(const std::string& filename)
 {
+    std::cout << "Reading program from file: '" << filename << "'" << std::endl;
     auto result = std::vector<int>();
     std::ifstream infile(filename);
+    if(!infile.is_open()) {
+        throw std::runtime_error("Could not load file: '" + filename + "'");
+    }
     int elem;
     char seperator;
     while (infile >> elem)
@@ -95,15 +102,15 @@ void debug_print_code(const std::vector<int>& codes, int inst_ptr, const int cod
         }
         case INSTRUCTION::ADDITION: {
             std::cout << "ADDITION\t( ";
-            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << "\t";
-            std::cout << "val#2: " << get_param<2>(codes, code, inst_ptr) << "\t";
+            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << " \t";
+            std::cout << "val#2: " << get_param<2>(codes, code, inst_ptr) << " \t";
             std::cout << "write pos: " << codes.at(inst_ptr + 3) << ") ";
             break;
         }
         case INSTRUCTION::MULTIPLY: {
             std::cout << "MULTIPLY\t( ";
-            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << "\t";
-            std::cout << "val#2: " << get_param<2>(codes, code, inst_ptr) << "\t";
+            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << " \t";
+            std::cout << "val#2: " << get_param<2>(codes, code, inst_ptr) << " \t";
             std::cout << "write pos: " << codes.at(inst_ptr + 3) << ") ";
             break;
         }
@@ -119,27 +126,27 @@ void debug_print_code(const std::vector<int>& codes, int inst_ptr, const int cod
         }
         case INSTRUCTION::JUMP_IF_TRUE: {
             std::cout << "JUMP_IF_TRUE\t( ";
-            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << "\t ";
+            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << " \t";
             std::cout << "val#2: " << get_param<2>(codes, code, inst_ptr) << ") ";
             break;
         }
         case INSTRUCTION::JUMP_IF_FALSE: {
             std::cout << "JUMP_IF_FALSE\t( ";
-            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << "\t ";
+            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << " \t";
             std::cout << "val#2: " << get_param<2>(codes, code, inst_ptr) << ") ";
             break;
         }
         case INSTRUCTION::LESS_THAN: {
-            std::cout << "LESS_THAN\t\t( ";
-            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << "\t ";
-            std::cout << "val#2: " << get_param<2>(codes, code, inst_ptr) << "\t ";
+            std::cout << "LESS_THAN\t( ";
+            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << " \t";
+            std::cout << "val#2: " << get_param<2>(codes, code, inst_ptr) << " \t";
             std::cout << "write pos: " << codes.at(inst_ptr + 3) << ") ";
             break;
         }
         case INSTRUCTION::EQUALS: {
             std::cout << "EQUALS\t\t( ";
-            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << "\t ";
-            std::cout << "val#2: " << get_param<2>(codes, code, inst_ptr) << "\t ";
+            std::cout << "val#1: " << get_param<1>(codes, code, inst_ptr) << " \t";
+            std::cout << "val#2: " << get_param<2>(codes, code, inst_ptr) << " \t";
             std::cout << "write pos: " << codes.at(inst_ptr + 3) << ") ";
             break;
         }
@@ -218,6 +225,8 @@ void execute_equals(std::vector<int>& codes, int& inst_ptr, const int code) {
 }
 
 int execute_codes(std::vector<int> codes, int input) {
+    std::cout << OUT_PREFIX <<  "input: " << input << std::endl;
+
     bool termination_indicator = false;
     auto inst_ptr = 0;
     int last_output = 0;
@@ -317,10 +326,25 @@ void tests() {
 }
 
 
-int main()
+int main(int argc, char *argv[])
 {
-    auto codes = read_input("input.txt");
+    std::cout << "Usage: ./program [program file] [input number]" << std::endl;
+    
+    // defaults
+    auto file_name = "input.txt";
+    auto input = 5;
+
+    // cmd arguments
+    if(argc > 1) {
+        file_name = argv[1];
+    }
+    if(argc > 2) {
+        input = atoi(argv[2]);
+    }
+    auto codes = read_input(file_name);
     // print(codes);
-    auto result = execute_codes(codes, 5);
+
+    std::cout << std::endl;
+    auto result = execute_codes(codes, input);
     // tests();
 }
