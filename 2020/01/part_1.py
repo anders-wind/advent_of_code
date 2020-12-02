@@ -1,7 +1,7 @@
-from pathlib import Path
+from typing import List
 
 
-def read_ints(file_path):
+def read_input(file_path) -> List[int]:
     res = set({})
     with open(file_path, 'r') as file_handle:
         for line in file_handle:
@@ -9,20 +9,18 @@ def read_ints(file_path):
     return res
 
 
-def calculate_result(file_path):
-    numbers = read_ints(file_path)
+def calculate_result(numbers: List[int]) -> int:
     for number in numbers:
         opposite = 2020 - number
         if opposite in numbers:
-            print(number * opposite)
-            return
+            return number * opposite
 
     raise Exception("Could not find combi")
 
 
 def main():
-    calculate_result(Path(__file__).parent / Path("sample.txt"))
-    calculate_result(Path(__file__).parent / Path("input.txt"))
+    print(calculate_result(read_input("sample.txt")))
+    print(calculate_result(read_input("input.txt")))
 
 
 if __name__ == "__main__":

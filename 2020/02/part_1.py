@@ -9,20 +9,19 @@ def read_input(file_path):
     return res
 
 
-def solve(data):
+def solve(data) -> int:
     total_passed = 0
     for minimum, maximum, char, password in data:
-        occurence = 1 if password[minimum - 1] == char else 0
-        occurence += 1 if password[maximum - 1] == char else 0
-        if occurence == 1:
+        count = password.count(char)
+        if count >= minimum and count <= maximum:
             total_passed += 1
 
-    print(total_passed)
+    return total_passed
 
 
 def main():
-    solve(read_input("sample.txt"))
-    solve(read_input("input.txt"))
+    print(solve(read_input("sample.txt")))
+    print(solve(read_input("input.txt")))
 
 
 if __name__ == "__main__":

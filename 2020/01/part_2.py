@@ -1,30 +1,19 @@
-from pathlib import Path
+from part_1 import read_input
 
 
-def read_ints(file_path):
-    res = set({})
-    with open(file_path, 'r') as file_handle:
-        for line in file_handle:
-            res.add(int(line))
-    return res
-
-
-def calculate_result(file_path):
-    numbers = read_ints(file_path)
+def calculate_result(numbers) -> int:
     for number_1 in numbers:
         for number_2 in numbers:
-            number = number_1 + number_2
-            opposite = 2020 - number
+            opposite = 2020 - (number_1 + number_2)
             if opposite in numbers:
-                print(number_1 * number_2 * opposite)
-                return
+                return number_1 * number_2 * opposite
 
     raise Exception("Could not find combi")
 
 
 def main():
-    calculate_result(Path(__file__).parent / Path("sample.txt"))
-    calculate_result(Path(__file__).parent / Path("input.txt"))
+    print(calculate_result(read_input("sample.txt")))
+    print(calculate_result(read_input("input.txt")))
 
 
 if __name__ == "__main__":
