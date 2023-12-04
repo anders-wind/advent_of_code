@@ -3,7 +3,8 @@
   "version-semver": "0.1.0",
   "dependencies": [
     "fmt",
-    "doctest"
+    "doctest",
+    "range-v3"
   ],
   "default-features": [],
   "features": {},

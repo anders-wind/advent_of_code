@@ -1,0 +1,46 @@
+#pragma once
+#include <fstream>
+#include <stdexcept>
+#include <string_view>
+#include <vector>
+
+#include <fmt/core.h>
+#include <range/v3/range/conversion.hpp>
+#include <range/v3/view/filter.hpp>
+#include <range/v3/view/getlines.hpp>
+#include <range/v3/view/transform.hpp>
+
+#include <experimental/generator>
+
+namespace wind
+{
+
+constexpr static auto is_digit = [](char v) -> bool { return std::isdigit(v); };
+constexpr static auto to_digit = [](char v) -> int32_t { return v - '0'; };
+constexpr static auto to_number = [](std::string_view sv) -> int32_t
+{
+    int32_t val {};
+    auto result = std::from_chars(sv.data(), sv.data() + sv.size(), val);
+    if (result.ec == std::errc::invalid_argument) {
+        throw std::runtime_error(fmt::format("Could not convert to number: '{}'\n", sv));
+    }
+    return val;
+};
+
+template<typename ParserT>
+static auto read_input(std::string_view filename, ParserT parser)
+{
+    using T = std::invoke_result_t<ParserT, std::string_view>;
+    auto fs = std::ifstream(std::string {filename});
+
+    if (!fs.is_open()) {
+        throw std::runtime_error(fmt::format("Could not read file: {}\n", filename));
+    }
+
+    return ranges::getlines(fs)                                                        //
+         | ranges::views::filter([](std::string_view line) { return !line.empty(); })  //
+         | ranges::views::transform(parser)                                            //
+         | ranges::to<std::vector>;
+}
+
+}  // namespace wind
