@@ -30,13 +30,19 @@ constexpr static auto to_number = [](std::string_view sv) -> int32_t
 
 constexpr static auto trim = [](std::string_view sv)
 {
+    if (sv.empty()) {
+        return sv;
+    }
     auto first = sv.find_first_not_of(" ");
     auto last = sv.find_last_not_of(" ");
-    return sv.substr(first, last);
+    return sv.substr(first, last - first + 1);
 };
 
 constexpr static auto string_view_split = [](auto delimiter)
-{ return std::views::split(delimiter) | std::views::transform([](auto rng) { return std::string_view(rng); }); };
+{
+    return std::views::split(delimiter)                                            //
+         | std::views::transform([](auto rng) { return std::string_view(rng); });  //
+};
 
 template<typename ParserT>
 static auto read_input(std::string_view filename, ParserT parser)
