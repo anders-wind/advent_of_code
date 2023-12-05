@@ -27,6 +27,8 @@ add_executable(
     source/day01/part2.cpp
     source/day02/part1.cpp
     source/day02/part2.cpp
+    source/day03/part1.cpp
+    source/day03/part2.cpp
     source/main.cpp
 )
 add_executable(aoc2023::exe ALIAS aoc2023_exe)
