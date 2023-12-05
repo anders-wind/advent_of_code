@@ -1,5 +1,6 @@
 #pragma once
 #include <fstream>
+#include <ranges>
 #include <stdexcept>
 #include <string_view>
 #include <vector>
@@ -33,6 +34,9 @@ constexpr static auto trim = [](std::string_view sv)
     auto last = sv.find_last_not_of(" ");
     return sv.substr(first, last);
 };
+
+constexpr static auto string_view_split = [](auto delimiter)
+{ return std::views::split(delimiter) | std::views::transform([](auto rng) { return std::string_view(rng); }); };
 
 template<typename ParserT>
 static auto read_input(std::string_view filename, ParserT parser)

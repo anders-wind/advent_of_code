@@ -33,11 +33,9 @@ static auto parse(std::string_view file)
     {
         auto game_stop = line.find(':');
         auto g = game {};
-        auto rounds = line.substr(game_stop + 1) | std::views::split(';')
-                    | std::views::transform([](auto rng) { return std::string_view(rng); });
+        auto rounds = line.substr(game_stop + 1) | string_view_split(';');
         for (auto round : rounds) {
-            auto values =
-                round | std::views::split(',') | std::views::transform([](auto rng) { return std::string_view(rng); });
+            auto values = round | string_view_split(',');
 
             for (auto value : values) {
                 if (auto it_red = value.find("red"); it_red != std::string_view::npos) {
