@@ -27,6 +27,13 @@ constexpr static auto to_number = [](std::string_view sv) -> int32_t
     return val;
 };
 
+constexpr static auto trim = [](std::string_view sv)
+{
+    auto first = sv.find_first_not_of(" ");
+    auto last = sv.find_last_not_of(" ");
+    return sv.substr(first, last);
+};
+
 template<typename ParserT>
 static auto read_input(std::string_view filename, ParserT parser)
 {
