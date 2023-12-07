@@ -28,7 +28,7 @@ static auto parse(std::string_view file)
     {
         auto game_stop = line.find(':');
         auto game_id_start = line.find(' ');
-        auto g = game {.id = to_number(trim(line.substr(game_id_start, game_stop - game_id_start)))};
+        auto g = game {.id = to_number<int32_t>(trim(line.substr(game_id_start, game_stop - game_id_start)))};
         auto rounds = line.substr(game_stop + 1) | std::views::split(';')
                     | std::views::transform([](auto rng) { return std::string_view(rng); });
         for (auto round : rounds) {
@@ -37,11 +37,11 @@ static auto parse(std::string_view file)
 
             for (auto value : values) {
                 if (auto it_red = value.find("red"); it_red != std::string_view::npos) {
-                    g.max_red = std::max(g.max_red, to_number(trim(value.substr(0, it_red))));
+                    g.max_red = std::max(g.max_red, to_number<int32_t>(trim(value.substr(0, it_red))));
                 } else if (auto it_blue = value.find("blue"); it_blue != std::string_view::npos) {
-                    g.max_blue = std::max(g.max_blue, to_number(trim(value.substr(0, it_blue))));
+                    g.max_blue = std::max(g.max_blue, to_number<int32_t>(trim(value.substr(0, it_blue))));
                 } else if (auto it_green = value.find("green"); it_green != std::string_view::npos) {
-                    g.max_green = std::max(g.max_green, to_number(trim(value.substr(0, it_green))));
+                    g.max_green = std::max(g.max_green, to_number<int32_t>(trim(value.substr(0, it_green))));
                 }
             }
         }

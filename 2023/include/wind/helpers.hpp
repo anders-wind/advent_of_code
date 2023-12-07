@@ -18,9 +18,11 @@ namespace wind
 
 constexpr static auto is_digit = [](char v) -> bool { return std::isdigit(v); };
 constexpr static auto to_digit = [](char v) -> int32_t { return v - '0'; };
-constexpr static auto to_number = [](std::string_view sv) -> int32_t
+
+template<typename NumberT>
+constexpr static auto to_number(std::string_view sv) -> NumberT
 {
-    int32_t val {};
+    NumberT val {};
     auto result = std::from_chars(sv.data(), sv.data() + sv.size(), val);
     if (result.ec == std::errc::invalid_argument) {
         throw std::runtime_error(fmt::format("Could not convert to number: '{}'\n", sv));
@@ -44,10 +46,8 @@ constexpr static auto string_view_split = [](auto delimiter)
          | std::views::transform([](auto rng) { return std::string_view(rng); });  //
 };
 
-template<typename ParserT>
-static auto read_input(std::string_view filename, ParserT parser)
+static auto get_lines(std::string_view filename)
 {
-    using T = std::invoke_result_t<ParserT, std::string_view>;
     auto fs = std::ifstream(std::string {filename});
 
     if (!fs.is_open()) {
@@ -56,7 +56,14 @@ static auto read_input(std::string_view filename, ParserT parser)
 
     return ranges::getlines(fs)                                                        //
          | ranges::views::filter([](std::string_view line) { return !line.empty(); })  //
-         | ranges::views::transform(parser)                                            //
+         | ranges::to<std::vector>;                                                    //
+}
+
+static auto read_input(std::string_view filename, auto parser)
+{
+    auto lines = get_lines(filename);
+    return lines                             //
+         | ranges::views::transform(parser)  //
          | ranges::to<std::vector>;
 }
 

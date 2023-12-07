@@ -42,17 +42,19 @@ static auto parse(std::string_view file) -> std::vector<game>
         auto g = game {};
         line = line.substr(line.find(':') + 1);
         auto winning_numbers_line = line.substr(0, line.find('|'));
-        auto winning_numbers = winning_numbers_line | string_view_split(' ')                                         //
-                             | std::ranges::views::transform(trim)                                                   //
-                             | std::ranges::views::filter([](auto number_str) { return !number_str.empty(); })       //
-                             | std::ranges::views::transform([](auto number_str) { return to_number(number_str); })  //
-                             | ranges::to<std::unordered_set>;                                                       //
+        auto winning_numbers =
+            winning_numbers_line | string_view_split(' ')                                                    //
+            | std::ranges::views::transform(trim)                                                            //
+            | std::ranges::views::filter([](auto number_str) { return !number_str.empty(); })                //
+            | std::ranges::views::transform([](auto number_str) { return to_number<int32_t>(number_str); })  //
+            | ranges::to<std::unordered_set>;                                                                //
         auto your_numbers_line = line.substr(line.find("|") + 1);
-        auto your_numbers = your_numbers_line | string_view_split(' ')                                            //
-                          | std::ranges::views::transform(trim)                                                   //
-                          | std::ranges::views::filter([](auto number_str) { return !number_str.empty(); })       //
-                          | std::ranges::views::transform([](auto number_str) { return to_number(number_str); })  //
-                          | ranges::to<std::unordered_set>;                                                       //
+        auto your_numbers =
+            your_numbers_line | string_view_split(' ')                                                       //
+            | std::ranges::views::transform(trim)                                                            //
+            | std::ranges::views::filter([](auto number_str) { return !number_str.empty(); })                //
+            | std::ranges::views::transform([](auto number_str) { return to_number<int32_t>(number_str); })  //
+            | ranges::to<std::unordered_set>;                                                                //
         return game {.number_of_cards = 1, .winning = std::move(winning_numbers), .yours = std::move(your_numbers)};
     };
     return wind::read_input(file, parser);
